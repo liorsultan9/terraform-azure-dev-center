@@ -16,12 +16,11 @@ jobs:
     runs-on: ubuntu-latest
     
     env:
-      # אלו משתני הסביבה הסטנדרטיים
       ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
       ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-      # הוספת המשתנה הזה אומרת לטרפורם: "אל תנסה להשתמש ב-Azure CLI"
+      # השורה הזו קריטית - היא מונעת את השגיאה של "Please run az login"
       ARM_USE_MSI: false
 
     steps:
@@ -32,32 +31,14 @@ jobs:
       uses: hashicorp/setup-terraform@v3
 
     - name: Terraform Init
-      run: |
-        terraform init \
-          -backend-config="client_id=${{ secrets.AZURE_CLIENT_ID }}" \
-          -backend-config="client_secret=${{ secrets.AZURE_CLIENT_SECRET }}" \
-          -backend-config="subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
-          -backend-config="tenant_id=${{ secrets.AZURE_TENANT_ID }}"
-      env:
-        # וידוא נוסף שהסודות זמינים ספציפית לריצה הזו
-        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      # פקודת Init פשוטה, כי משתני ה-ARM למעלה מטפלים בחיבור ל-Backend
+      run: terraform init
 
     - name: Terraform Plan
       run: terraform plan -input=false
-      env:
-        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
     - name: Terraform Apply
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       run: terraform apply -auto-approve -input=false
-      env:
-        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+      
