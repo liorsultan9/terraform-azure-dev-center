@@ -1,11 +1,13 @@
 name: 'Terraform Azure Deploy'
 
+# 1. הגדרת הטריגרים: מתי ה-Pipeline ירוץ
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main" ]         # ירוץ ויבצע Apply כשנכנס קוד ל-main
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main" ]         # ירוץ ויבצע Plan בלבד כשפותחים PR
 
+# 2. הרשאות נדרשות לכתיבת תגובות ב-PR
 permissions:
   contents: read
   pull-requests: write
@@ -15,7 +17,7 @@ jobs:
     name: 'Terraform'
     runs-on: ubuntu-latest
     
-    # הגדרת המשתנים ברמת ה-Job מבטיחה שכל הצעדים (Steps) יכירו אותם
+    # 3. הגדרת המשתנים ברמת ה-Job (התיקון הקריטי לשגיאה שלך)
     env:
       ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
@@ -23,20 +25,23 @@ jobs:
       ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
     steps:
+    # 4. משיכת הקוד מהמאגר
     - name: Checkout
       uses: actions/checkout@v4
 
+    # 5. התקנת Terraform על המכונה
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
 
-    # עכשיו ה-Init יצליח להתחבר ל-Backend באז'ור
+    # 6. איתחול טרפורם (התחברות ל-Backend)
     - name: Terraform Init
       run: terraform init
 
+    # 7. בדיקת השינויים (ירוץ תמיד - גם ב-PR וגם ב-Main)
     - name: Terraform Plan
       run: terraform plan -input=false
 
-    # שלב ה-Apply ירוץ רק אחרי ה-Merge ל-main
+    # 8. ביצוע השינויים בפועל (ירוץ רק אחרי Merge ל-main)
     - name: Terraform Apply
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       run: terraform apply -auto-approve -input=false
