@@ -4,16 +4,18 @@ on:
   push:
     branches: [ "main" ]
   pull_request:
-    branches: [ "main" ] # מפעיל בדיקות כשפותחים PR ל-main
+    branches: [ "main" ]
 
 permissions:
   contents: read
-  pull-requests: write # מאפשר ל-Terraform לכתוב תגובה בתוך ה-PR
+  pull-requests: write
 
 jobs:
   terraform:
     name: 'Terraform'
     runs-on: ubuntu-latest
+    
+    # הגדרת המשתנים ברמת ה-Job מבטיחה שכל הצעדים (Steps) יכירו אותם
     env:
       ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
@@ -27,15 +29,14 @@ jobs:
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
 
+    # עכשיו ה-Init יצליח להתחבר ל-Backend באז'ור
     - name: Terraform Init
       run: terraform init
 
-    # הרצת Plan תמיד תקרה (גם ב-PR וגם ב-Main)
     - name: Terraform Plan
       run: terraform plan -input=false
 
-    # הרצת Apply תקרה רק אם אנחנו על ענף main (כלומר אחרי ה-Merge)
+    # שלב ה-Apply ירוץ רק אחרי ה-Merge ל-main
     - name: Terraform Apply
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       run: terraform apply -auto-approve -input=false
-      
