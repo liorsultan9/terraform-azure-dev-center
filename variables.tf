@@ -20,5 +20,11 @@ variable "buckets" {
     "storage2" = {
       labels = { "env" = "test" }
     }
+    
+    "storage3" = {
+      labels = { "env" = "dev" }
+    }
+
+
   }
 }
