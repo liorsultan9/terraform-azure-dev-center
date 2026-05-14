@@ -1,12 +1,12 @@
 variable "project_id" {
   type        = string
   description = "The name of the resource group"
-  default     = "production" # זה השם של ה-RG שיצרת באז'ור
+  default     = "production"
 }
 
 variable "region" {
-  type        = string
-  default     = "East US" # אז'ור משתמש בשמות כמו East US ולא us-central1
+  type    = string
+  default = "East US"
 }
 
 variable "buckets" {
@@ -19,16 +19,15 @@ variable "buckets" {
     },
     "storage2" = {
       labels = { "env" = "test" }
-    }
-    
+    },
     "storage3" = {
       labels = { "env" = "dev" }
-    }
-
-     "storage4" = {
+    },
+    "storage4" = {
+      labels = { "env" = "dev" }
+    },
+    "storage5" = {
       labels = { "env" = "dev" }
     }
-
-
   }
 }
